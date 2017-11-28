@@ -57,10 +57,12 @@ private:
 	ofstream _dataBase;
 	int DoCommand(char * command);
 	Command * ToLowevCase(char * command);
+	int Create(char* name);
+	void SetColor(int ForgC);
 public:
 	DataBase();
 	int ReadCommands();
-	int Create(char* name);
+
 	int Start();
 	~DataBase();
 };
