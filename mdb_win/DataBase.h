@@ -30,7 +30,7 @@ public:
 		int count = 0;
 		for (size_t i = 0; i < strlen(commandString); i++)
 		{
-			if (commandString[i] == ' ')
+			if (commandString[i] == ' ' || commandString[i] == ',')
 			{
 				word[pos] = '\0';
 				Words[count] = new char[pos];
@@ -52,17 +52,24 @@ public:
 class DataBase
 {
 private:
+	thread* _commandThread;
+	thread* _sqlThread;
 	char* _version;
 	char* _errorMessage;
+	char* _currentDB;
 	ofstream _dataBase;
 	int DoCommand(char * command);
+	int DoSQL(char * sqlCommand);
 	Command * ToLowevCase(char * command);
 	int Create(char* name);
 	void SetColor(int ForgC);
+	
+	int StartSql();
+	int CreateTable(Command * sqlCommand);
 public:
 	DataBase();
 	int ReadCommands();
-
+    int ReadSqlCommands();
 	int Start();
 	~DataBase();
 };
