@@ -15,6 +15,14 @@ using namespace std;
 #pragma endregion
 #pragma warning( push )
 #pragma warning( disable : 4996)
+class DataBasesBlock
+{
+public:
+	char* Block;
+	int Count;
+	int Offset;
+
+};
 class Command
 {
 public:
@@ -58,12 +66,15 @@ private:
 	char* _errorMessage;
 	char* _currentDB;
 	ofstream _dataBase;
+	ifstream _dataBaseRead;
 	int DoCommand(char * command);
 	int DoSQL(char * sqlCommand);
 	Command * ToLowevCase(char * command);
 	int Create(char* name);
 	void SetColor(int ForgC);
 	
+	int ShowAllDataBases();
+
 	int StartSql();
 	int CreateTable(Command * sqlCommand);
 public:
