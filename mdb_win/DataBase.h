@@ -21,6 +21,11 @@ public:
 	char* Block;
 	int Count;
 	int Offset;
+	DataBasesBlock()
+	{
+		Count = 0;
+		Offset = 0;
+	}
 
 };
 class Command
@@ -65,7 +70,7 @@ private:
 	char* _version;
 	char* _errorMessage;
 	char* _currentDB;
-	ofstream _dataBase;
+	fstream _dataBase;
 	ifstream _dataBaseRead;
 	int DoCommand(char * command);
 	int DoSQL(char * sqlCommand);
