@@ -4,6 +4,11 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
+#include <string>
+#include <windows.h>
+#include <direct.h>
+#include "Command.h"
+
 #pragma endregion
 
 using namespace std;
@@ -28,39 +33,6 @@ public:
 	}
 
 };
-class Command
-{
-public:
-	char* commandWord;
-	char* commandString;
-	int countWords;
-	char** Words;
-	void ParseWords()
-	{
-		char* word = new char[255];
-		Words = new char * [countWords];
-		int pos = 0;
-		int count = 0;
-		for (size_t i = 0; i < strlen(commandString); i++)
-		{
-			if (commandString[i] == ' ' || commandString[i] == ',')
-			{
-				word[pos] = '\0';
-				Words[count] = new char[pos];
-				strcpy(Words[count], word);
-				count++;
-				pos = 0;
-			}
-			else
-			{
-				word[pos++] = commandString[i];
-			}
-		}
-		word[pos] = '\0';
-		Words[count] = new char[pos];
-		strcpy(Words[count], word);
-	}
-};
 #pragma once
 class DataBase
 {
@@ -69,13 +41,12 @@ private:
 	thread* _sqlThread;
 	char* _version;
 	char* _errorMessage;
-	char* _currentDB;
+	string _currentDB;
 	fstream _dataBase;
 	ifstream _dataBaseRead;
 	int DoCommand(char * command);
 	int DoSQL(char * sqlCommand);
-	Command * ToLowevCase(char * command);
-	int Create(char* name);
+	int Create(string dbName);
 	void SetColor(int ForgC);
 	
 	int ShowAllDataBases();
