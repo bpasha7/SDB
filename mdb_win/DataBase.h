@@ -13,7 +13,7 @@
 
 using namespace std;
 
-
+const string _directory = "storage\\";
 
 #pragma region Defines
 
