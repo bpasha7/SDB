@@ -7,16 +7,16 @@ VARCHAR(*)
 */
 //
 #define NULLABLE 1
-#define NOTNULL 0
+#define NOT_NULL 0
 
 class Column
 {
 public:
 	string Name;
-	string Type;
+	char Type;
 	bool Nullable;
 	string Default;
-	Column();
+	Column(string arguments);
 	~Column();
 };
 

@@ -14,6 +14,7 @@
 using namespace std;
 
 const string _directory = "storage\\";
+const string _logPath= "logs\\";
 
 #pragma region Defines
 
@@ -45,7 +46,7 @@ private:
 	fstream _dataBase;
 	ifstream _dataBaseRead;
 	int DoCommand(char * command);
-	int DoSQL(char * sqlCommand);
+	int DoSQL(string sqlCommand);
 	int Create(string dbName);
 	void SetColor(int ForgC);
 	
