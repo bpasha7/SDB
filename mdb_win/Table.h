@@ -25,6 +25,7 @@ private:
 	//Column* _columns;
 
 	int create(Command * sqlCommand);
+	int insert(Command * sqlCommand);
 	bool isTableExist();
 };
 

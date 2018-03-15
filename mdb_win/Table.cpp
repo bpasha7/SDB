@@ -14,6 +14,10 @@ int Table::DoSqlCommand(Command * sqlCommand)
 	{
 		create(sqlCommand);
 	}
+	if (sqlCommand->Words[0] == "insert")
+	{
+		insert(sqlCommand);
+	}
 	return 0;
 }
 
@@ -28,28 +32,44 @@ bool Table::isTableExist()
 
 int Table::create(Command * sqlCommand)
 {
-	string path = _directory + _dataBaseName + "\\" + Name + ".dtt";
-	_dataBaseStream.open(path, ios::in | ios::binary | ios::out | ios::app);
+	string path = _directory + _dataBaseName + "\\" + Name + ".df";
+	_dataBaseStream.open(path, ios::binary | ios::out | ios::app);
 	auto sql = new Create_Table_Command(sqlCommand->text);
 	
-	int t = _dataBaseStream.tellp();
+/*	int t = _dataBaseStream.tellp();
 	_dataBaseStream.seekp(0);
-	t = _dataBaseStream.tellp();
+	t = */
+	//start from the beginig
+	//_dataBaseStream.tellp();
+	
 	for (int i = 0; i < sql->CoulumnCount; i++)
 	{
-		//sql->Columns[i]->WriteColumnProperties(&_dataBaseStream);
+		sql->Columns[i]->WriteColumnProperties(&_dataBaseStream);
 		//_dataBaseStream.write((char *)&sql->Columns[i], sizeof(sql->Columns[i]));
 		
 		//_dataBaseStream.read((char *)&cl, sizeof(cl));
-		Column* cl= new Column(&_dataBaseStream);
+		/*Column* cl= new Column(&_dataBaseStream);
 		auto n = cl->Name;
-		auto s = cl->Size;
+		auto s = cl->Size;*/
 	}
-	//char buf[255]; // = "#Table ";
-	/*int schemeLength = 0;*/
-	//_dataBaseStream.write((char *)&num, sizeof(int));
-	//_dataBaseStream << 1 << "test" << 123 << '1' << '3' << endl;
-	//_dataBase >> s;
+
+	_dataBaseStream.close();
+
+	path = _directory + _dataBaseName + "\\" + Name + ".dt";
+	_dataBaseStream.open(path, ios::in | ios::binary | ios::out | ios::app);
+	_dataBaseStream.close();
+	return 0;
+}
+
+int Table::insert(Command * sqlCommand)
+{
+	string path = _directory + _dataBaseName + "\\" + Name + ".dt";
+	_dataBaseStream.open(path, ios::in | ios::binary | ios::app);
+	auto sql = new Insert_Into(sqlCommand->text);
+	for (size_t i = 0; i < sql->Values.size(); i++)
+	{
+		_dataBaseStream.write(sql->Values[i].c_str(), sql->Values[i].length());
+	}
 	_dataBaseStream.close();
 	return 0;
 }

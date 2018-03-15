@@ -29,6 +29,26 @@ public:
 	int CoulumnCount;
 	Column** Columns;
 	Create_Table_Command(string commandLine);
-	//~Create_Table_Command();
+	~Create_Table_Command();
 };
+
+class Select_From final : SqlCommand
+{
+public:
+	//int CoulumnCount;
+	vector<string> Values;
+	Select_From(string commandLine);
+	//~Select_From();
+};
+
+class Insert_Into final : SqlCommand
+{
+public:
+	//int CoulumnCount;
+	vector<string> Values;
+	Insert_Into(string commandLine);
+	//~Select_From();
+};
+
+
 

@@ -31,8 +31,8 @@ Create_Table_Command::Create_Table_Command(string commandLine)
 {
 	//Columns
 	vector<string> splited;
-	auto t = commandLine.find_last_of(')');
-	int rt = commandLine.size();
+	//auto openBracket = commandLine.find_last_of(')');
+	//int rt = commandLine.size();
 	istringstream iss(
 		commandLine.substr(commandLine.find('(') + 1, commandLine.find_last_of(')') - commandLine.find('(') - 1)
 	);
@@ -52,7 +52,28 @@ Create_Table_Command::Create_Table_Command(string commandLine)
 	}
 }
 
+Create_Table_Command::~Create_Table_Command()
+{
+	//free array of columns
+	for (int i = 0; i < CoulumnCount; i++)
+	{
+		delete Columns[i];
+	}
+	delete Columns;
+}
 
+Select_From::Select_From(string commandLine)
+{
+	
+}
 
+Insert_Into::Insert_Into(string commandLine)
+{
+	istringstream iss(
+		commandLine.substr(commandLine.find('(') + 1, commandLine.find_last_of(')') - commandLine.find('(') - 1)
+	);
 
-
+	copy(istream_iterator<WordDelimitedByCommas>(iss),
+		istream_iterator<WordDelimitedByCommas>(),
+		back_inserter(Values));
+}
