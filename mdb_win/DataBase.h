@@ -8,6 +8,8 @@
 #include <windows.h>
 #include <direct.h>
 #include "Command.h"
+#include "Table.h"
+
 
 #pragma endregion
 

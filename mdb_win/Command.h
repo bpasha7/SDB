@@ -4,7 +4,8 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
-//#include "Column.h"
+//#include "stdafx.h"
+#include "Column.h"
 
 using namespace std;
 #pragma once
@@ -25,7 +26,8 @@ class SqlCommand {
 class Create_Table_Command final : SqlCommand
 {
 public:
-	Column * Columns;
+	int CoulumnCount;
+	Column** Columns;
 	Create_Table_Command(string commandLine);
 	//~Create_Table_Command();
 };

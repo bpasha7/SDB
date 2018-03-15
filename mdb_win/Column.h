@@ -1,9 +1,17 @@
-//#include <string>
 #pragma once
+#include <cstring>
+#include <string>
+#include <vector>
+#include <iterator>
+#include <sstream>
+#include <fstream>
+
+using namespace std;
+
 /*Types
-INT
-BIT
-VARCHAR(*)
+INT 1
+BIT - 2
+VARCHAR(*) - 3
 */
 //
 #define NULLABLE 1
@@ -14,9 +22,14 @@ class Column
 public:
 	string Name;
 	char Type;
-	bool Nullable;
-	string Default;
+	int Size;
+	/*bool Nullable;
+	string Default;*/
 	Column(string arguments);
+	Column(fstream *stream);
+	int WriteColumnProperties(fstream *stream);
 	~Column();
+private:
+	int parseType(string type);
 };
 

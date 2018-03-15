@@ -1,4 +1,9 @@
 #pragma once
+#include <string>
+#include <sstream>
+
+using namespace std;
+
 static class DataBaseException
 {
 private:

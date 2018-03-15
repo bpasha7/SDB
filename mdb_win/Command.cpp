@@ -1,6 +1,13 @@
-#include "stdafx.h"
 #include "Command.h"
 
+class WordDelimitedByCommas : public string
+{};
+
+istream& operator>>(std::istream& is, WordDelimitedByCommas& output)
+{
+	getline(is, output, ',');
+	return is;
+}
 
 Command::Command(string commandLine)
 {
@@ -24,19 +31,22 @@ Create_Table_Command::Create_Table_Command(string commandLine)
 {
 	//Columns
 	vector<string> splited;
-
+	auto t = commandLine.find_last_of(')');
+	int rt = commandLine.size();
 	istringstream iss(
-		commandLine.substr(commandLine.find('('), commandLine.find_last_of(')'))
+		commandLine.substr(commandLine.find('(') + 1, commandLine.find_last_of(')') - commandLine.find('(') - 1)
 	);
 
-	copy(istream_iterator<string>(iss),
-		istream_iterator<string>(),
+	copy(istream_iterator<WordDelimitedByCommas>(iss),
+		istream_iterator<WordDelimitedByCommas>(),
 		back_inserter(splited));
-
 	//if(splited.size() == 0)
-	Columns = new Column * [splited.size()];
 
-	for (int i = 0; i < splited.size(); i++)
+
+	CoulumnCount = splited.size();
+	Columns = new Column * [CoulumnCount];
+
+	for (int i = 0; i < CoulumnCount; i++)
 	{
 		Columns[i] = new Column(splited[i]);
 	}
@@ -45,11 +55,4 @@ Create_Table_Command::Create_Table_Command(string commandLine)
 
 
 
-class WordDelimitedByCommas : public string
-{};
 
-istream& operator>>(std::istream& is, WordDelimitedByCommas& output)
-{
-	getline(is, output, ',');
-	return is;
-}
