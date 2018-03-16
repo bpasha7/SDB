@@ -40,12 +40,15 @@ Column::Column(fstream *stream)
 	stream->read((char *)&Type, sizeof(char));
 }
 
+//Write properties  of columns into scheme file
 int Column::WriteColumnProperties(fstream *stream)
 {
-	int length = Name.length();
-	stream->write((char *)&length, sizeof(int));
-	stream->write(Name.c_str(), length);
-	stream->write((char *)&Type, sizeof(char));
+	//Write length of column name
+	writeBinaryToSrteam(stream, (int)Name.length());
+	//Write column name
+	writeBinaryToSrteam(stream, Name);
+	//Write type of column
+	writeBinaryToSrteam(stream, Type);
 	return 0;
 }
 
@@ -99,4 +102,22 @@ int Column::parseType(string type)
 		return 0;
 	}	
 	return -1;
+}
+//Write into binary stream int value
+int Column::writeBinaryToSrteam(fstream * stream, int value)
+{
+	stream->write((char *)&value, sizeof(int));
+	return 0;
+}
+//Write into binary stream string value
+int Column::writeBinaryToSrteam(fstream * stream, string value)
+{
+	stream->write(value.c_str(), (int)value.length());
+	return 0;
+}
+//Write into binary stream char value
+int Column::writeBinaryToSrteam(fstream * stream, char value)
+{
+	stream->write((char *)&value, sizeof(char));
+	return 0;
 }
