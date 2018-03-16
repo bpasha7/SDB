@@ -22,7 +22,7 @@ private:
 	fstream _dataBaseStream;
 	string _dataBaseName;
 	int _tableId;
-	//Column* _columns;
+	Column* _columns;
 
 	int create(Command * sqlCommand);
 	int insert(Command * sqlCommand);

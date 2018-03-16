@@ -31,6 +31,8 @@ public:
 	~Column();
 private:
 	int parseType(string type);
+
+
 	int writeBinaryToSrteam(fstream * stream, char value);
 	int writeBinaryToSrteam(fstream * stream, int value);
 	int writeBinaryToSrteam(fstream * stream, string value);

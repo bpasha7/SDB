@@ -1,10 +1,11 @@
 #include "Column.h"
 #pragma warning(push)
 #pragma warning(disable : 4996)
+//Pare prperties of column from sql command
 Column::Column(string arguments)
 {
+	//Split words by
 	vector<string> splited;
-
 	istringstream iss(arguments);
 	copy(istream_iterator<string>(iss),
 		istream_iterator<string>(),
@@ -13,18 +14,10 @@ Column::Column(string arguments)
 	if (splited.size() > 1)
 	{
 		Name = splited[0];
-		//strcpy(Name, splited[0].c_str());
-		//strncpy_s<splited[0].size()>(Name, splited[0].c_str(), splited[0].size());
-		//if(splited[0].size() < 25)
-			//strcpy_s(Name, splited[0].c_str());
-		//Name = const_cast<char*>(splited[0].c_str());
 		parseType(splited[1]);
 	}
 
-	/*for (int i = 0; i < splited.size(); i++)
-	{
-		auto column = new Column(splited[i]);
-	}*/
+	splited.clear();
 }
 //
 Column::Column(fstream *stream)

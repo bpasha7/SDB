@@ -33,6 +33,9 @@
     <ClInclude Include="DataBaseException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BinaryStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mdb_win.cpp">
@@ -51,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DataBaseException.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

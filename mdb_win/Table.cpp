@@ -45,24 +45,19 @@ int Table::create(Command * sqlCommand)
 	for (int i = 0; i < sql->CoulumnCount; i++)
 	{
 		sql->Columns[i]->WriteColumnProperties(&_dataBaseStream);
-		//_dataBaseStream.write((char *)&sql->Columns[i], sizeof(sql->Columns[i]));
-		
-		//_dataBaseStream.read((char *)&cl, sizeof(cl));
-		/*Column* cl= new Column(&_dataBaseStream);
-		auto n = cl->Name;
-		auto s = cl->Size;*/
 	}
 
 	_dataBaseStream.close();
 
 	path = _directory + _dataBaseName + "\\" + Name + ".dt";
-	_dataBaseStream.open(path, ios::in | ios::binary | ios::out | ios::app);
+	_dataBaseStream.open(path, ios::binary | ios::out | ios::app);
 	_dataBaseStream.close();
 	return 0;
 }
 
 int Table::insert(Command * sqlCommand)
 {
+	
 	string path = _directory + _dataBaseName + "\\" + Name + ".dt";
 	_dataBaseStream.open(path, ios::in | ios::binary | ios::app);
 	auto sql = new Insert_Into(sqlCommand->text);
