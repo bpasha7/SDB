@@ -23,13 +23,13 @@ public:
 class SqlCommand {
 
 };
-class Create_Table_Command final : SqlCommand
+class Create_Table final : SqlCommand
 {
 public:
 	int CoulumnCount;
 	Column** Columns;
-	Create_Table_Command(string commandLine);
-	~Create_Table_Command();
+	Create_Table(string commandLine);
+	~Create_Table();
 };
 
 class Select_From final : SqlCommand

@@ -22,6 +22,7 @@ private:
 	fstream _dataBaseStream;
 	string _dataBaseName;
 	int _tableId;
+	//shared_ptr<Column> cls;
 	Column* _columns;
 
 	int create(Command * sqlCommand);

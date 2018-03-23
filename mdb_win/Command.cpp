@@ -27,7 +27,7 @@ Command::~Command()
 {
 }
 
-Create_Table_Command::Create_Table_Command(string commandLine)
+Create_Table::Create_Table(string commandLine)
 {
 	//Columns
 	vector<string> splited;
@@ -52,7 +52,7 @@ Create_Table_Command::Create_Table_Command(string commandLine)
 	}
 }
 
-Create_Table_Command::~Create_Table_Command()
+Create_Table::~Create_Table()
 {
 	//free array of columns
 	for (int i = 0; i < CoulumnCount; i++)
@@ -76,4 +76,5 @@ Insert_Into::Insert_Into(string commandLine)
 	copy(istream_iterator<WordDelimitedByCommas>(iss),
 		istream_iterator<WordDelimitedByCommas>(),
 		back_inserter(Values));
+
 }
