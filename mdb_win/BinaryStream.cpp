@@ -11,19 +11,30 @@ Returns:
 	0	-	OK,
 	1	-	FAIL.
 */
-int BinaryStream::WriteToTable(int value)
+int BinaryStream::Write(int value)
 {
 	_dataBaseStream.write((char *)&value, sizeof(int));
 	return 0;
 }
-void BinaryStream::Open(string dataBaseName, string tableName)
+void BinaryStream::Open(string dataBaseName, string tableName, bool head)
 {
-	string path = _directory + dataBaseName + "\\" + tableName + ".dt";
-	_dataBaseStream.open(path, ios::binary | ios::out | ios::app);
+	string ext = head ? ".df" : ".dt";
+	string path = _directory + dataBaseName + "\\" + tableName + ext;
+	_dataBaseStream.open(path, ios::binary | ios::out | ios::in | ios::app);
+}
+void BinaryStream::Create(string dataBaseName, string tableName, bool head)
+{
+	string ext = head ? ".df" : ".dt";
+	string path = _directory + dataBaseName + "\\" + tableName + ext;
+	_dataBaseStream.open(path, ios::binary | ios::out | ios::in | ios::app);
 }
 void BinaryStream::Close()
 {
 	_dataBaseStream.close();
+}
+bool BinaryStream::EoF()
+{
+	return _dataBaseStream.eof();
 }
 /*
 Description:
@@ -35,7 +46,7 @@ Returns:
 	0	-	OK,
 	1	-	FAIL.
 */
-int BinaryStream::WriteToTable(char value)
+int BinaryStream::Write(char value)
 {
 	_dataBaseStream.write((char *)&value, sizeof(char));
 	return 0;
@@ -50,20 +61,38 @@ integer values
 	0	-	OK,
 	1	-	FAIL.
 */
-int BinaryStream::WriteToTable(string value)
+int BinaryStream::Write(string value)
 {
 	_dataBaseStream.write(value.c_str(), value.length());
 	return 0;
 }
 
-void BinaryStream::SetPosition(int position)
+void BinaryStream::SetPosition(long position)
 {
 	_dataBaseStream.seekp(position);
 }
 
 char BinaryStream::ReadChar()
 {
-	return 0;
+	char val = ' ';
+	_dataBaseStream.read((char *)&val, sizeof(char));
+	return val;
+}
+
+int BinaryStream::ReadInteger()
+{
+	int val = 0;
+	//int t = _dataBaseStream.tellp();
+	_dataBaseStream.read((char *)&val, sizeof(int));
+	return val;
+}
+
+char const* BinaryStream::ReadString(int length)
+{
+	char* val = new char[length + 1];
+	_dataBaseStream.read(val, length);
+	val[length] = '\0';
+	return val;
 }
 
 BinaryStream::BinaryStream()

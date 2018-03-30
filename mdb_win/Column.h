@@ -26,15 +26,16 @@ public:
 	/*bool Nullable;
 	string Default;*/
 	Column(string arguments);
-	Column(fstream *stream);
-	int WriteColumnProperties(fstream *stream);
+	Column(/*fstream *stream*/);
+	int WriteColumnProperties();
+	int ReadColumnProperties();
 	~Column();
 private:
 	int parseType(string type);
 
 
-	int writeBinaryToSrteam(fstream * stream, char value);
-	int writeBinaryToSrteam(fstream * stream, int value);
-	int writeBinaryToSrteam(fstream * stream, string value);
+	//int writeBinaryToSrteam(fstream * stream, char value);
+	//int writeBinaryToSrteam(fstream * stream, int value);
+	//int writeBinaryToSrteam(fstream * stream, string value);
 };
 

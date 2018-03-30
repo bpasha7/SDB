@@ -18,15 +18,18 @@ public:
 	int DoSqlCommand(Command * sqlCommand);
 	~Table();
 private:
-
+	
 	fstream _dataBaseStream;
 	string _dataBaseName;
 	int _tableId;
 	//shared_ptr<Column> cls;
-	Column* _columns;
+	Column** _columns;
+	int columnsCount;
 
 	int create(Command * sqlCommand);
+	int select(Command * sqlCommand);
 	int insert(Command * sqlCommand);
 	bool isTableExist();
+	int getScheme();
 };
 

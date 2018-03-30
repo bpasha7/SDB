@@ -22,6 +22,9 @@ public:
 };
 class SqlCommand {
 
+protected:
+	string trim(const std::string& str,
+		const std::string& whitespace = " \t");
 };
 class Create_Table final : SqlCommand
 {
@@ -35,20 +38,23 @@ public:
 class Select_From final : SqlCommand
 {
 public:
+	string Table;
+	bool AllColumns;
 	//int CoulumnCount;
-	vector<string> Values;
-	Select_From(string commandLine);
+	vector<string> ColumnsName;
+	Select_From(Command * command);
 	//~Select_From();
 };
 
 class Insert_Into final : SqlCommand
 {
 public:
-	//int CoulumnCount;
 	vector<string> Values;
 	Insert_Into(string commandLine);
+	void padTo(string &str, const size_t num, const char paddingChar = 0);
 	//~Select_From();
 };
+
 
 
 

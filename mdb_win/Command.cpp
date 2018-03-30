@@ -27,6 +27,18 @@ Command::~Command()
 {
 }
 
+string SqlCommand::trim(const std::string & str, const std::string & whitespace)
+{
+	const auto strBegin = str.find_first_not_of(whitespace);
+	if (strBegin == std::string::npos)
+		return ""; // no content
+
+	const auto strEnd = str.find_last_not_of(whitespace);
+	const auto strRange = strEnd - strBegin + 1;
+
+	return str.substr(strBegin, strRange);
+}
+
 Create_Table::Create_Table(string commandLine)
 {
 	//Columns
@@ -62,9 +74,26 @@ Create_Table::~Create_Table()
 	delete Columns;
 }
 
-Select_From::Select_From(string commandLine)
+Select_From::Select_From(Command * command)
 {
-	
+	if (command->Words[1] == "*")
+		AllColumns = true;
+	else
+	{
+
+	}
+	//std::vector<string>::iterator it;
+	auto pos = find(command->Words.begin(), command->Words.end(), "from") - command->Words.begin();
+	//if word from not exist
+	if (pos >= command->Words.size()) {
+		//old_name_ not found
+	}
+	//not contain table name
+	if ((int)pos + 1 > command->Words.size())
+	{
+
+	}
+	Table = command->Words[pos + 1];
 }
 
 Insert_Into::Insert_Into(string commandLine)
@@ -77,4 +106,14 @@ Insert_Into::Insert_Into(string commandLine)
 		istream_iterator<WordDelimitedByCommas>(),
 		back_inserter(Values));
 
+	for (size_t i = 0; i < Values.size(); i++)
+	{
+		Values[i] = trim(Values[i]);
+	}
+}
+
+void Insert_Into::padTo(std::string & str, const size_t num, const char paddingChar)
+{
+	if (num > str.size())
+		str.insert(0, num - str.size(), paddingChar);
 }

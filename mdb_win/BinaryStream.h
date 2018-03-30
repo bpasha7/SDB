@@ -10,19 +10,18 @@ static fstream _dataBaseStream;
 static class BinaryStream
 {
 public:
-	static void Open(string dataBaseName, string tableName);
+	static void Create(string dataBaseName, string tableName, bool head);
+	static void Open(string dataBaseName, string tableName, bool head);
 	static void Close();
-	static int WriteToTable(char value);
-	static int WriteToTable(int value);
-	static int WriteToTable(string value);
-	/*	int t = _dataBaseStream.tellp();
-	_dataBaseStream.seekp(0);
-	t = */
-	static void SetPosition(int position);
+	static bool EoF();
+	static int Write(char value);
+	static int Write(int value);
+	static int Write(string value);
+	static void SetPosition(long position);
 
 	static char ReadChar();
 	static int ReadInteger();
-	static string ReadString();
+	static char const* ReadString(int length);
 	BinaryStream();
 	~BinaryStream();
 };
