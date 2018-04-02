@@ -40,7 +40,7 @@ class Select_From final : SqlCommand
 public:
 	string Table;
 	bool AllColumns;
-	//int CoulumnCount;
+	vector<string> Filter;
 	vector<string> ColumnsName;
 	Select_From(Command * command);
 	//~Select_From();

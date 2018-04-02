@@ -95,6 +95,14 @@ Select_From::Select_From(Command * command)
 	}
 	Table = command->Words[pos + 1];
 	pos = find(command->Words.begin(), command->Words.end(), "where") - command->Words.begin();
+	if (pos != command->Words.size())
+	{
+		Filter.clear();
+		//check length
+		Filter.push_back(command->Words[pos + 1]);
+		Filter.push_back(command->Words[pos + 2]);
+		Filter.push_back(command->Words[pos + 3]);
+	}
 
 }
 

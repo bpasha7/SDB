@@ -111,6 +111,7 @@ int Table::select(Command * sqlCommand)
 	while (!BinaryStream::EoF())
 	{
 		Record* record = new Record();
+		bool skip = false;//filter flag
 		record->Values.clear();
 		//cout << "|\t" << counter++ << "\t" << "|";
 		for (size_t i = 0; i < columnsCount; i++)
@@ -120,6 +121,33 @@ int Table::select(Command * sqlCommand)
 			case '1':
 			{
 				int val = BinaryStream::ReadInteger();
+				//string val = to_string(BinaryStream::ReadInteger());
+				
+				if (sql->Filter.size() != 0 && sql->Filter[0] == _columns[i]->Name)
+				{
+					int filterValue = stoi(sql->Filter[2]);
+					switch (sql->Filter[1][0])
+					{
+					case '>':
+					{
+						skip = val > filterValue ? false : true;
+						break;
+					}
+					case '<':
+					{
+						skip = val < filterValue ? false : true;
+						//skip = val.compare(sql->Filter[2]) < 0 ? false : true;
+						break;
+					}
+					case '=':
+					{
+						skip = val == filterValue ? false : true;
+						break;
+					}
+					default:
+						break;
+					}
+				}
 				record->Values.push_back(to_string(val));
 				//cout << "\t" << BinaryStream::ReadInteger() << "\t" << "|";
 				break;
@@ -144,6 +172,8 @@ int Table::select(Command * sqlCommand)
 				break;
 			}
 		}
+		if (skip)
+			continue;
 		_records.push_back(*record);
 		//cout << std::endl;
 	}
@@ -226,7 +256,7 @@ void Table::showResult()
 	SetConsoleTextAttribute(hConsole, 10);
 	cout << std::endl;
 	//Вывод название полей
-	cout << "|\t" << "#" << "\t" << "|";
+	cout << "|" << "#" << "\t" << "|";
 	for (size_t i = 0; i < columnsCount; i++)
 	{
 		cout << "\t" << _columns[i]->Name << "\t" << "|";
@@ -234,7 +264,7 @@ void Table::showResult()
 	cout << std::endl;
 	for (size_t row = 0; row < _records.size(); row++)
 	{
-		cout << "|\t" << row + 1 << "\t" << "|";
+		cout << "|" << row + 1 << "\t" << "|";
 		for (size_t i = 0; i < columnsCount; i++)
 		{
 			switch (_columns[i]->Type)
