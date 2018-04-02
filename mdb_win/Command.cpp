@@ -94,6 +94,8 @@ Select_From::Select_From(Command * command)
 
 	}
 	Table = command->Words[pos + 1];
+	pos = find(command->Words.begin(), command->Words.end(), "where") - command->Words.begin();
+
 }
 
 Insert_Into::Insert_Into(string commandLine)

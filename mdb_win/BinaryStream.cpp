@@ -34,7 +34,7 @@ void BinaryStream::Close()
 }
 bool BinaryStream::EoF()
 {
-	return _dataBaseStream.eof();
+	return _dataBaseStream.peek() == std::ifstream::traits_type::eof();
 }
 /*
 Description:
@@ -82,8 +82,10 @@ char BinaryStream::ReadChar()
 int BinaryStream::ReadInteger()
 {
 	int val = 0;
-	//int t = _dataBaseStream.tellp();
+	int t = _dataBaseStream.tellp();
 	_dataBaseStream.read((char *)&val, sizeof(int));
+	t = _dataBaseStream.tellp();
+	bool  b = _dataBaseStream.eof();
 	return val;
 }
 

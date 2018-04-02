@@ -1,6 +1,7 @@
 #include "Table.h"
 #include "DataBase.h"
 #include "BinaryStream.h"
+
 //#include <list>
 
 Table::Table(string dataBaseName, string tableName)
@@ -101,33 +102,33 @@ int Table::select(Command * sqlCommand)
 	auto sql = new Select_From(sqlCommand);
 	Name = sql->Table;
 	getScheme();
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, 10);
-	cout << "|\t" << "#" << "\t" << "|";
-	for (size_t i = 0; i < columnsCount; i++)
-	{
-		cout << "\t" << _columns[i]->Name << "\t" << "|";
-	}
-	cout << std::endl;
+
 
 	BinaryStream::Open(_dataBaseName, Name, false);
 	BinaryStream::SetPosition(0);
+	_records.clear();
 	int counter = 1;
 	while (!BinaryStream::EoF())
 	{
-		cout << "|\t" << counter++ << "\t" << "|";
+		Record* record = new Record();
+		record->Values.clear();
+		//cout << "|\t" << counter++ << "\t" << "|";
 		for (size_t i = 0; i < columnsCount; i++)
 		{
 			switch (_columns[i]->Type)
 			{
 			case '1':
 			{
-				cout << "\t" << BinaryStream::ReadInteger() << "\t" << "|";
+				int val = BinaryStream::ReadInteger();
+				record->Values.push_back(to_string(val));
+				//cout << "\t" << BinaryStream::ReadInteger() << "\t" << "|";
 				break;
 			}
 			case '2':
 			{
-				cout << "\t" << BinaryStream::ReadChar() << "\t" << "|";
+				char val = BinaryStream::ReadChar();
+				record->Values.push_back(to_string(val == '0' ? 0 : 1));
+				//cout << "\t" << BinaryStream::ReadChar() << "\t" << "|";
 				break;
 			}
 			case '3':
@@ -135,20 +136,22 @@ int Table::select(Command * sqlCommand)
 				int length = BinaryStream::ReadInteger();
 				string val = BinaryStream::ReadString(length);
 				val.erase(std::remove(val.begin(), val.end(), -63), val.end());
-				cout << "\t" << val << "\t" << "|";
+				record->Values.push_back(val);
+				//cout << "\t" << val << "\t" << "|";
 				break;
 			}
 			default:
 				break;
 			}
 		}
-		cout << std::endl;
+		_records.push_back(*record);
+		//cout << std::endl;
 	}
 
 	BinaryStream::Close();
+	showResult();
 
 
-	SetConsoleTextAttribute(hConsole, 7);
 	return 0;
 }
 
@@ -215,4 +218,47 @@ int Table::insert(Command * sqlCommand)
 	}
 	BinaryStream::Close();
 	return 0;
+}
+
+void Table::showResult()
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 10);
+	cout << std::endl;
+	//Вывод название полей
+	cout << "|\t" << "#" << "\t" << "|";
+	for (size_t i = 0; i < columnsCount; i++)
+	{
+		cout << "\t" << _columns[i]->Name << "\t" << "|";
+	}
+	cout << std::endl;
+	for (size_t row = 0; row < _records.size(); row++)
+	{
+		cout << "|\t" << row + 1 << "\t" << "|";
+		for (size_t i = 0; i < columnsCount; i++)
+		{
+			switch (_columns[i]->Type)
+			{
+			case '1':
+			{
+				cout << "\t" << _records[row].Values[i] << "\t" << "|";
+				break;
+			}
+			case '2':
+			{
+				cout << "\t" << _records[row].Values[i] << "\t" << "|";
+				break;
+			}
+			case '3':
+			{
+				cout << "\t'" << _records[row].Values[i] << "'\t" << "|";
+				break;
+			}
+			default:
+				break;
+			}
+		}
+		cout << std::endl;
+	}
+	SetConsoleTextAttribute(hConsole, 7);
 }
