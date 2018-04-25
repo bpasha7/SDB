@@ -82,10 +82,10 @@ char BinaryStream::ReadChar()
 int BinaryStream::ReadInteger()
 {
 	int val = 0;
-	int t = _dataBaseStream.tellp();
+	//int t = _dataBaseStream.tellp();
 	_dataBaseStream.read((char *)&val, sizeof(int));
-	t = _dataBaseStream.tellp();
-	bool  b = _dataBaseStream.eof();
+	//t = _dataBaseStream.tellp();
+	//bool  b = _dataBaseStream.eof();
 	return val;
 }
 

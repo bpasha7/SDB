@@ -103,7 +103,11 @@ Select_From::Select_From(Command * command)
 		Filter.push_back(command->Words[pos + 2]);
 		Filter.push_back(command->Words[pos + 3]);
 	}
-
+	pos = find(command->Words.begin(), command->Words.end(), "order") - command->Words.begin();
+	if (pos != command->Words.size() )
+	{
+		OrderBy = command->Words[pos + 2];
+	}
 }
 
 Insert_Into::Insert_Into(string commandLine)

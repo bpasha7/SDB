@@ -103,11 +103,17 @@ int Table::select(Command * sqlCommand)
 	Name = sql->Table;
 	getScheme();
 
+	map<long, long> positions;
+
+	//std::sort(positions.begin(), positions.end());
+
+	/*BinaryStream::Open(_dataBaseName, Name, false);
+	BinaryStream::SetPosition(0);*/
 
 	BinaryStream::Open(_dataBaseName, Name, false);
 	BinaryStream::SetPosition(0);
 	_records.clear();
-	int counter = 1;
+	int counter = 0;
 	while (!BinaryStream::EoF())
 	{
 		Record* record = new Record();
@@ -121,8 +127,6 @@ int Table::select(Command * sqlCommand)
 			case '1':
 			{
 				int val = BinaryStream::ReadInteger();
-				//string val = to_string(BinaryStream::ReadInteger());
-				
 				if (sql->Filter.size() != 0 && sql->Filter[0] == _columns[i]->Name)
 				{
 					int filterValue = stoi(sql->Filter[2]);
@@ -136,7 +140,6 @@ int Table::select(Command * sqlCommand)
 					case '<':
 					{
 						skip = val < filterValue ? false : true;
-						//skip = val.compare(sql->Filter[2]) < 0 ? false : true;
 						break;
 					}
 					case '=':
@@ -148,15 +151,15 @@ int Table::select(Command * sqlCommand)
 						break;
 					}
 				}
+				if(_columns[i]->Name == sql->OrderBy)
+					positions.insert(pair<long, long>(counter++, val));
 				record->Values.push_back(to_string(val));
-				//cout << "\t" << BinaryStream::ReadInteger() << "\t" << "|";
 				break;
 			}
 			case '2':
 			{
 				char val = BinaryStream::ReadChar();
 				record->Values.push_back(to_string(val == '0' ? 0 : 1));
-				//cout << "\t" << BinaryStream::ReadChar() << "\t" << "|";
 				break;
 			}
 			case '3':
@@ -165,7 +168,6 @@ int Table::select(Command * sqlCommand)
 				string val = BinaryStream::ReadString(length);
 				val.erase(std::remove(val.begin(), val.end(), -63), val.end());
 				record->Values.push_back(val);
-				//cout << "\t" << val << "\t" << "|";
 				break;
 			}
 			default:
@@ -179,74 +181,88 @@ int Table::select(Command * sqlCommand)
 	}
 
 	BinaryStream::Close();
-	showResult();
 
+	typedef function<bool(pair<long, long>, pair<long, long>)> Comparator;
+	
+	Comparator cmp = [](pair<long, long> const & a, pair<long, long> const & b)
+	{
+		return a.second != b.second ? a.second < b.second : a.first < b.first;
+	};
+
+	set<pair<long, long>, Comparator> orderSet(positions.begin(), positions.end(), cmp);
+
+	for (std::pair<long, long> element : orderSet)
+		_positions.push_back(element.first);
+
+	showResult();
 
 	return 0;
 }
+
 
 int Table::insert(Command * sqlCommand)
 {
 	getScheme();
 	auto sql = new Insert_Into(sqlCommand->text);
-	BinaryStream::Open(_dataBaseName, Name, false);
-	BinaryStream::SetPosition(ios_base::end);
-	std::stringstream convertor;
-	for (size_t i = 0; i < sql->Values.size(); i++)
+	try
 	{
-		try
+		BinaryStream::Open(_dataBaseName, Name, false);
+		BinaryStream::SetPosition(ios_base::end);
+		for (size_t i = 0; i < sql->Values.size(); i++)
 		{
+
 			switch (_columns[i]->Type)
 			{
-				case '1':
+			case '1':
+			{
+				int number = stoi(sql->Values[i]);
+				//convertor << sql->Values[i];
+				//convertor >> number;
+				/*if (convertor.fail())
+					thrownew exception("Not number"); */
+				BinaryStream::Write(number);
+				break;
+			}
+			case '2':
+			{
+				char bit;
+				/*convertor << sql->Values[i];
+				convertor >> bit;*/
+
+				if (sql->Values[i] == "true" || sql->Values[i] == "1")
+					bit = '1';
+				else if (sql->Values[i] == "false" || sql->Values[i] == "0")
+					bit = '0';
+				else
 				{
-					int number;
-					convertor << sql->Values[i];
-					convertor >> number;
-					if (convertor.fail())
-						throw new exception("Not number");
-					BinaryStream::Write(number);
-					break;
+					errMsg = "Value " + sql->Values[i] + " is not bit!";
+					throw new exception();
 				}
-				case '2':
-				{
-					char bit;
-					/*convertor << sql->Values[i];
-					convertor >> bit;*/
-					
-					if (sql->Values[i] == "true" || sql->Values[i] == "1")
-						bit = '1';
-					else if(sql->Values[i] == "false" || sql->Values[i] == "0")
-						bit = '0';
-					else
-						throw new exception("Not bit");
-					BinaryStream::Write(bit);
-					break;
-				}
-				case '3':
-				{
-					string val = sql->Values[i];
-					if(val.length() > _columns[i]->Size)
-						throw new exception("Not bit");
-					sql->padTo(val, _columns[i]->Size, 193);
-					BinaryStream::Write(_columns[i]->Size);
-					BinaryStream::Write(val);
-					break;
-				}
+				BinaryStream::Write(bit);
+				break;
+			}
+			case '3':
+			{
+				string val = sql->Values[i];
+				if (val.length() > _columns[i]->Size)
+					throw new exception("Not bit");
+				sql->padTo(val, _columns[i]->Size, 193);
+				BinaryStream::Write(_columns[i]->Size);
+				BinaryStream::Write(val);
+				break;
+			}
 
 			default:
 				break;
 			}
-			//BinaryStream::Write(sql->Values[i]);
-
 		}
-		catch (...)
-		{
-			/* ... */
-		}
-		//_dataBaseStream.write(sql->Values[i].c_str(), sql->Values[i].length());
+		BinaryStream::Close();
 	}
-	BinaryStream::Close();
+	catch (...)
+	{
+		showError(301, errMsg);
+		errMsg = "";
+	}
 	return 0;
 }
 
@@ -254,16 +270,19 @@ void Table::showResult()
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, 10);
-	cout << std::endl;
+	cout << endl;
 	//Вывод название полей
 	cout << "|" << "#" << "\t" << "|";
 	for (size_t i = 0; i < columnsCount; i++)
 	{
 		cout << "\t" << _columns[i]->Name << "\t" << "|";
 	}
-	cout << std::endl;
+	cout << endl;
 	for (size_t row = 0; row < _records.size(); row++)
 	{
+		long pos = row;
+		if (_positions.size() > 0)
+			pos = _positions[pos];
 		cout << "|" << row + 1 << "\t" << "|";
 		for (size_t i = 0; i < columnsCount; i++)
 		{
@@ -271,24 +290,32 @@ void Table::showResult()
 			{
 			case '1':
 			{
-				cout << "\t" << _records[row].Values[i] << "\t" << "|";
+				cout << "\t" << _records[pos].Values[i] << "\t" << "|";
 				break;
 			}
 			case '2':
 			{
-				cout << "\t" << _records[row].Values[i] << "\t" << "|";
+				cout << "\t" << _records[pos].Values[i] << "\t" << "|";
 				break;
 			}
 			case '3':
 			{
-				cout << "\t'" << _records[row].Values[i] << "'\t" << "|";
+				cout << "\t'" << _records[pos].Values[i] << "'\t" << "|";
 				break;
 			}
 			default:
 				break;
 			}
 		}
-		cout << std::endl;
+		cout << endl;
 	}
+	SetConsoleTextAttribute(hConsole, 7);
+}
+//Errors with table has pattern 3xx
+void Table::showError(int errorNumber, string message)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 12);
+	cout << "Error ("<< errorNumber <<"): " << message  << endl;
 	SetConsoleTextAttribute(hConsole, 7);
 }

@@ -41,6 +41,7 @@ public:
 	string Table;
 	bool AllColumns;
 	vector<string> Filter;
+	string OrderBy;
 	vector<string> ColumnsName;
 	Select_From(Command * command);
 	//~Select_From();
