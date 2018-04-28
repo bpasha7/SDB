@@ -103,12 +103,8 @@ int Table::select(Command * sqlCommand)
 	Name = sql->Table;
 	getScheme();
 
-	map<long, long> positions;
-
-	//std::sort(positions.begin(), positions.end());
-
-	/*BinaryStream::Open(_dataBaseName, Name, false);
-	BinaryStream::SetPosition(0);*/
+	map<long, long> positionsInt;
+	map<long, string> positionsString;
 
 	BinaryStream::Open(_dataBaseName, Name, false);
 	BinaryStream::SetPosition(0);
@@ -119,7 +115,6 @@ int Table::select(Command * sqlCommand)
 		Record* record = new Record();
 		bool skip = false;//filter flag
 		record->Values.clear();
-		//cout << "|\t" << counter++ << "\t" << "|";
 		for (size_t i = 0; i < columnsCount; i++)
 		{
 			switch (_columns[i]->Type)
@@ -152,7 +147,7 @@ int Table::select(Command * sqlCommand)
 					}
 				}
 				if(_columns[i]->Name == sql->OrderBy)
-					positions.insert(pair<long, long>(counter++, val));
+					positionsInt.insert(pair<long, long>(counter, val));
 				record->Values.push_back(to_string(val));
 				break;
 			}
@@ -168,6 +163,8 @@ int Table::select(Command * sqlCommand)
 				string val = BinaryStream::ReadString(length);
 				val.erase(std::remove(val.begin(), val.end(), -63), val.end());
 				record->Values.push_back(val);
+				if (_columns[i]->Name == sql->OrderBy)
+					positionsString.insert(pair<long, string>(counter, val));
 				break;
 			}
 			default:
@@ -176,24 +173,40 @@ int Table::select(Command * sqlCommand)
 		}
 		if (skip)
 			continue;
+		counter++;
 		_records.push_back(*record);
 		//cout << std::endl;
 	}
 
 	BinaryStream::Close();
 
-	typedef function<bool(pair<long, long>, pair<long, long>)> Comparator;
-	
-	Comparator cmp = [](pair<long, long> const & a, pair<long, long> const & b)
+	if (positionsInt.size() > 0)
 	{
-		return a.second != b.second ? a.second < b.second : a.first < b.first;
-	};
+		typedef function<bool(pair<long, long>, pair<long, long>)> Comparator;
 
-	set<pair<long, long>, Comparator> orderSet(positions.begin(), positions.end(), cmp);
+		Comparator cmp = [](pair<long, long> const & a, pair<long, long> const & b)
+		{
+			return a.second != b.second ? a.second < b.second : a.first < b.first;
+		};
 
-	for (std::pair<long, long> element : orderSet)
-		_positions.push_back(element.first);
+		set<pair<long, long>, Comparator> orderSet(positionsInt.begin(), positionsInt.end(), cmp);
 
+		for (std::pair<long, long> element : orderSet)
+			_positions.push_back(element.first);
+	}
+	if(positionsString.size() > 0) {
+		typedef function<bool(pair<long, string>, pair<long, string>)> ComparatorString;
+
+		ComparatorString cmp = [](pair<long, string> const & a, pair<long, string> const & b)
+		{
+			return a.second != b.second ? a.second < b.second : a.first < b.first;
+		};
+
+		set<pair<long, string>, ComparatorString> orderSet(positionsString.begin(), positionsString.end(), cmp);
+
+		for (std::pair<long, string> element : orderSet)
+			_positions.push_back(element.first);
+	}
 	showResult();
 
 	return 0;
