@@ -133,7 +133,7 @@ int Table::select(Command * sqlCommand)
 		record->Values.clear();
 		for (size_t i = 0; i < columnsCount; i++)
 		{
-			if (std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), _columns[i]->Name) == sql->ColumnsName.end())
+			if (!sql->AllColumns && std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), _columns[i]->Name) == sql->ColumnsName.end())
 			{
 				record->Values.push_back("");
 				continue;
