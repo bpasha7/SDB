@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -24,6 +25,7 @@ private:
 	fstream _dataBaseStream;
 	string _dataBaseName;
 	int _tableId;
+	int _recordLength;
 	//shared_ptr<Column> cls;
 	Column** _columns;
 	vector<Record> _records;

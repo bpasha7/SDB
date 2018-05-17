@@ -23,6 +23,7 @@ public:
 	string Name;
 	char Type;
 	int Size;
+	int Pos;
 	/*bool Nullable;
 	string Default;*/
 	Column(string arguments);

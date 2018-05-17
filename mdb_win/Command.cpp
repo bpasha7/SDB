@@ -76,38 +76,66 @@ Create_Table::~Create_Table()
 
 Select_From::Select_From(Command * command)
 {
+	auto from = find(command->Words.begin(), command->Words.end(), "from") - command->Words.begin();
 	if (command->Words[1] == "*")
 		AllColumns = true;
 	else
 	{
+		ColumnsName.clear();
+		for (size_t i = 1; i < from; i++)
+		{
+			int comma = command->Words[i].find(",");
+			auto name = command->Words[i];
 
+			ColumnsName.push_back(comma != string::npos ? command->Words[i].erase(comma, 1) : command->Words[i]);
+		}
 	}
 	//std::vector<string>::iterator it;
-	auto pos = find(command->Words.begin(), command->Words.end(), "from") - command->Words.begin();
 	//if word from not exist
-	if (pos >= command->Words.size()) {
+	if (from >= command->Words.size()) {
 		//old_name_ not found
 	}
 	//not contain table name
-	if ((int)pos + 1 > command->Words.size())
+	if ((int)from + 1 > command->Words.size())
 	{
 
 	}
-	Table = command->Words[pos + 1];
-	pos = find(command->Words.begin(), command->Words.end(), "where") - command->Words.begin();
-	if (pos != command->Words.size())
+	Table = command->Words[from + 1];
+
+	auto orderBy = find(command->Words.begin(), command->Words.end(), "order") - command->Words.begin();
+	if (orderBy != command->Words.size())
+	{
+		OrderBy = command->Words[orderBy + 2];
+	}
+	command->Words.erase(command->Words.begin() + orderBy, command->Words.begin() + orderBy + 3);
+	//command->Words.pop_back(pos + 1);
+	//command->Words.pop_back(pos + 2);
+
+	auto where = find(command->Words.begin(), command->Words.end(), "where") - command->Words.begin();
+	if (where != command->Words.size())
 	{
 		Filter.clear();
 		//check length
-		Filter.push_back(command->Words[pos + 1]);
-		Filter.push_back(command->Words[pos + 2]);
-		Filter.push_back(command->Words[pos + 3]);
+		if ((command->Words.size() - where) % 4 == 0)
+		{
+			for (size_t i = where + 1; i < command->Words.size(); i+=4)
+			{
+				Filter.push_back(command->Words[i]);
+				Filter.push_back(command->Words[i + 1]);
+				Filter.push_back(command->Words[i + 2]);
+				if(i + 3 != command->Words.size())
+					Filter.push_back(command->Words[i + 3]);
+			}
+		}
+		else if ((command->Words.size() - where) == 3)
+		{
+			Filter.push_back(command->Words[where + 1]);
+			Filter.push_back(command->Words[where + 2]);
+			Filter.push_back(command->Words[where + 3]);
+		}
+
 	}
-	pos = find(command->Words.begin(), command->Words.end(), "order") - command->Words.begin();
-	if (pos != command->Words.size() )
-	{
-		OrderBy = command->Words[pos + 2];
-	}
+
 }
 
 Insert_Into::Insert_Into(string commandLine)

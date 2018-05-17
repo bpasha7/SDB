@@ -56,10 +56,22 @@ int Table::getScheme()
 	columnsCount = BinaryStream::ReadInteger();
 	_columns = new Column *[columnsCount];
 
+	_recordLength = 0;
+
 	for (int i = 0; i < columnsCount; i++)
 	{
 		_columns[i] = new Column();
 		_columns[i]->ReadColumnProperties();
+		// count row length
+		_recordLength += _columns[i]->Size + (_columns[i]->Type == '3' ? 4 : 0);
+		// calculate column position in a row
+		if (i == 0)
+			_columns[i]->Pos = 0;
+		else
+		{
+			//add 4 bytes if pervious type is char(n)
+			_columns[i]->Pos = _columns[i - 1]->Pos + _columns[i-1]->Size + (_columns[i - 1]->Type == '3' ? 4 : 0);
+		}
 	}
 
 	BinaryStream::Close();
@@ -106,10 +118,14 @@ int Table::select(Command * sqlCommand)
 	map<long, long> positionsInt;
 	map<long, string> positionsString;
 
+
+
 	BinaryStream::Open(_dataBaseName, Name, false);
 	BinaryStream::SetPosition(0);
 	_records.clear();
+	int read = 0;
 	int counter = 0;
+
 	while (!BinaryStream::EoF())
 	{
 		Record* record = new Record();
@@ -117,6 +133,12 @@ int Table::select(Command * sqlCommand)
 		record->Values.clear();
 		for (size_t i = 0; i < columnsCount; i++)
 		{
+			if (std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), _columns[i]->Name) == sql->ColumnsName.end())
+			{
+				record->Values.push_back("");
+				continue;
+			}
+			BinaryStream::SetPosition(counter * _recordLength + _columns[i]->Pos);
 			switch (_columns[i]->Type)
 			{
 			case '1':
@@ -146,8 +168,8 @@ int Table::select(Command * sqlCommand)
 						break;
 					}
 				}
-				if(_columns[i]->Name == sql->OrderBy)
-					positionsInt.insert(pair<long, long>(counter, val));
+				if (_columns[i]->Name == sql->OrderBy)
+					positionsInt.insert(pair<long, long>(read, val));
 				record->Values.push_back(to_string(val));
 				break;
 			}
@@ -161,19 +183,22 @@ int Table::select(Command * sqlCommand)
 			{
 				int length = BinaryStream::ReadInteger();
 				string val = BinaryStream::ReadString(length);
-				val.erase(std::remove(val.begin(), val.end(), -63), val.end());
+				val.erase(remove(val.begin(), val.end(), -63), val.end());
 				record->Values.push_back(val);
 				if (_columns[i]->Name == sql->OrderBy)
-					positionsString.insert(pair<long, string>(counter, val));
+					positionsString.insert(pair<long, string>(read, val));
 				break;
 			}
 			default:
 				break;
 			}
 		}
+		counter++;
+		BinaryStream::SetPosition(counter * _recordLength);
+
 		if (skip)
 			continue;
-		counter++;
+		read++;
 		_records.push_back(*record);
 		//cout << std::endl;
 	}
@@ -194,7 +219,7 @@ int Table::select(Command * sqlCommand)
 		for (std::pair<long, long> element : orderSet)
 			_positions.push_back(element.first);
 	}
-	if(positionsString.size() > 0) {
+	if (positionsString.size() > 0) {
 		typedef function<bool(pair<long, string>, pair<long, string>)> ComparatorString;
 
 		ComparatorString cmp = [](pair<long, string> const & a, pair<long, string> const & b)
@@ -329,6 +354,6 @@ void Table::showError(int errorNumber, string message)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, 12);
-	cout << "Error ("<< errorNumber <<"): " << message  << endl;
+	cout << "Error (" << errorNumber << "): " << message << endl;
 	SetConsoleTextAttribute(hConsole, 7);
 }

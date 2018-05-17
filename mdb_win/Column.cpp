@@ -54,6 +54,10 @@ int Column::ReadColumnProperties()
 	int length = BinaryStream::ReadInteger();
 	Name = BinaryStream::ReadString(length);
 	Type = BinaryStream::ReadChar();
+	if (Type == '1')
+		Size = 4;
+	if (Type == '2')
+		Size = 1;
 	if (Type == '3')
 		Size = BinaryStream::ReadInteger();
 	return 0;
