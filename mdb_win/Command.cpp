@@ -106,8 +106,9 @@ Select_From::Select_From(Command * command)
 	if (orderBy != command->Words.size())
 	{
 		OrderBy = command->Words[orderBy + 2];
+		command->Words.erase(command->Words.begin() + orderBy, command->Words.begin() + orderBy + 3);
+
 	}
-	command->Words.erase(command->Words.begin() + orderBy, command->Words.begin() + orderBy + 3);
 	//command->Words.pop_back(pos + 1);
 	//command->Words.pop_back(pos + 2);
 
