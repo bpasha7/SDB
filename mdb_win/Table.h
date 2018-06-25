@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 
@@ -26,8 +27,8 @@ private:
 	string _dataBaseName;
 	int _tableId;
 	int _recordLength;
-	//shared_ptr<Column> cls;
-	Column** _columns;
+	unique_ptr<Column> _columns;
+	//Column** _columns;
 	vector<Record> _records;
 	int columnsCount;
 	vector<long> _positions;
