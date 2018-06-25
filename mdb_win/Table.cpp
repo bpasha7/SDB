@@ -1,5 +1,6 @@
 #include "Table.h"
 #include "DataBase.h"
+#include "DataSet.h"
 #include "BinaryStream.h"
 
 //#include <list>
@@ -80,15 +81,7 @@ int Table::getScheme()
 
 int Table::create(Command * sqlCommand)
 {
-	//string path = _directory + _dataBaseName + "\\" + Name + ".df";
-	//_dataBaseStream.open(path, ios::binary | ios::out | ios::app);
 	auto sql = new Create_Table(sqlCommand->text);
-
-	/*	int t = _dataBaseStream.tellp();
-		_dataBaseStream.seekp(0);
-		t = */
-		//start from the beginig
-		//_dataBaseStream.tellp();
 
 	BinaryStream::Create(_dataBaseName, Name, true);
 	BinaryStream::Write(sql->CoulumnCount);
@@ -99,13 +92,9 @@ int Table::create(Command * sqlCommand)
 	}
 	BinaryStream::Close();
 
-	//_dataBaseStream.close();
-
 	BinaryStream::Create(_dataBaseName, Name, false);
 	BinaryStream::Close();
-	//path = _directory + _dataBaseName + "\\" + Name + ".dt";
-	//_dataBaseStream.open(path, ios::binary | ios::out | ios::app);
-	//_dataBaseStream.close();
+
 	return 0;
 }
 
@@ -131,11 +120,18 @@ int Table::select(Command * sqlCommand)
 		Record* record = new Record();
 		bool skip = false;//filter flag
 		record->Values.clear();
+		if (!sql->AllColumns)
+		{
+			for (size_t i = 0; i < columnsCount; i++)
+			{
+				std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), _columns[i]->Name) == sql->ColumnsName.end()
+			}
+		}
 		for (size_t i = 0; i < columnsCount; i++)
 		{
 			if (!sql->AllColumns && std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), _columns[i]->Name) == sql->ColumnsName.end())
 			{
-				record->Values.push_back("");
+				record->Values.push_back("none");
 				continue;
 			}
 			BinaryStream::SetPosition(counter * _recordLength + _columns[i]->Pos);
@@ -203,6 +199,7 @@ int Table::select(Command * sqlCommand)
 		//cout << std::endl;
 	}
 
+
 	BinaryStream::Close();
 
 	if (positionsInt.size() > 0)
@@ -232,6 +229,11 @@ int Table::select(Command * sqlCommand)
 		for (std::pair<long, string> element : orderSet)
 			_positions.push_back(element.first);
 	}
+
+	auto ds = new DataSet(_records.size(), columnsCount);
+	//_records.Values.erase(std::remove(_records[0]->Values.begin(), record->Values.end(), 8), record->Values.end());
+	ds->SetRecord(_records[0], 0);
+
 	showResult();
 
 	return 0;
@@ -309,6 +311,8 @@ void Table::showResult()
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, 10);
 	cout << endl;
+
+
 	//Вывод название полей
 	cout << "|" << "#" << "\t" << "|";
 	for (size_t i = 0; i < columnsCount; i++)

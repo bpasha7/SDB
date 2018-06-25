@@ -148,6 +148,7 @@
     <ClInclude Include="Command.h" />
     <ClInclude Include="DataBase.h" />
     <ClInclude Include="DataBaseException.h" />
+    <ClInclude Include="DataSet.h" />
     <ClInclude Include="Record.h" />
     <ClInclude Include="Table.h" />
     <ClInclude Include="targetver.h" />
@@ -158,6 +159,7 @@
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="DataBase.cpp" />
     <ClCompile Include="DataBaseException.cpp" />
+    <ClCompile Include="DataSet.cpp" />
     <ClCompile Include="mdb_win.cpp" />
     <ClCompile Include="Record.cpp" />
     <ClCompile Include="Table.cpp" />
