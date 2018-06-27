@@ -1,6 +1,7 @@
 #pragma once
 #include "Command.h"
 #include "Record.h"
+#include "DataSet.h"
 #include <cstring>
 #include <string>
 #include <vector>
@@ -27,7 +28,8 @@ private:
 	string _dataBaseName;
 	int _tableId;
 	int _recordLength;
-	unique_ptr<Column> _columns;
+	vector<Column> _columns;
+	//unique_ptr<Column> _columns;
 	//Column** _columns;
 	vector<Record> _records;
 	int columnsCount;
@@ -35,7 +37,7 @@ private:
 	int create(Command * sqlCommand);
 	int select(Command * sqlCommand);
 	int insert(Command * sqlCommand);
-	void showResult();
+	void showResult(DataSet * ds);
 	void showError(int errorNumber, string message);
 	bool isTableExist();
 	int getScheme();

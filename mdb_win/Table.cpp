@@ -55,23 +55,23 @@ int Table::getScheme()
 	BinaryStream::SetPosition(0);
 
 	columnsCount = BinaryStream::ReadInteger();
-	_columns = unique_ptr<Column>(new Column[columnsCount]);//new Column *[columnsCount];
+	_columns.clear();
 
 	_recordLength = 0;
 
 	for (int i = 0; i < columnsCount; i++)
 	{
-		//(_columns.get() + i) = new Column();
-		(_columns.get() + i)->ReadColumnProperties();
+		_columns.push_back(*new Column());
+		_columns[i].ReadColumnProperties();
 		// count row length
-		_recordLength += (_columns.get() + i)->Size + ((_columns.get() + i)->Type == '3' ? 4 : 0);
+		_recordLength += _columns[i].Size + (_columns[i].Type == '3' ? 4 : 0);
 		// calculate column position in a row
 		if (i == 0)
-			(_columns.get() + i)->Pos = 0;
+			_columns[i].Pos = 0;
 		else
 		{
 			//add 4 bytes if pervious type is char(n)
-			(_columns.get() + i)->Pos = (_columns.get() + i - 1)->Pos + (_columns.get() + i - 1)->Size + ((_columns.get() + i - 1)->Type == '3' ? 4 : 0);
+			_columns[i].Pos = _columns[i - 1].Pos + _columns[i - 1].Size + (_columns[i - 1].Type == '3' ? 4 : 0);
 		}
 	}
 
@@ -120,27 +120,28 @@ int Table::select(Command * sqlCommand)
 		Record* record = new Record();
 		bool skip = false;//filter flag
 		record->Values.clear();
-		/*if (!sql->AllColumns)
+		if (!sql->AllColumns)
 		{
 			for (size_t i = 0; i < columnsCount; i++)
 			{
-				std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), (_columns.get() + i)->Name) == sql->ColumnsName.end()
+				if (std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), _columns[i].Name) == sql->ColumnsName.end())
+					_columns[i].Name = "none";
 			}
-		}*/
+		}
 		for (size_t i = 0; i < columnsCount; i++)
 		{
-			if (!sql->AllColumns && std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), (_columns.get() + i)->Name) == sql->ColumnsName.end())
+			if (!sql->AllColumns && std::find(sql->ColumnsName.begin(), sql->ColumnsName.end(), _columns[i].Name) == sql->ColumnsName.end())
 			{
 				record->Values.push_back("none");
 				continue;
 			}
-			BinaryStream::SetPosition(counter * _recordLength + (_columns.get() + i)->Pos);
-			switch ((_columns.get() + i)->Type)
+			BinaryStream::SetPosition(counter * _recordLength + _columns[i].Pos);
+			switch (_columns[i].Type)
 			{
 			case '1':
 			{
 				int val = BinaryStream::ReadInteger();
-				if (sql->Filter.size() != 0 && sql->Filter[0] == (_columns.get() + i)->Name)
+				if (sql->Filter.size() != 0 && sql->Filter[0] == _columns[i].Name)
 				{
 					int filterValue = stoi(sql->Filter[2]);
 					switch (sql->Filter[1][0])
@@ -164,7 +165,7 @@ int Table::select(Command * sqlCommand)
 						break;
 					}
 				}
-				if ((_columns.get() + i)->Name == sql->OrderBy)
+				if (_columns[i].Name == sql->OrderBy)
 					positionsInt.insert(pair<long, long>(read, val));
 				record->Values.push_back(to_string(val));
 				break;
@@ -181,7 +182,7 @@ int Table::select(Command * sqlCommand)
 				string val = BinaryStream::ReadString(length);
 				val.erase(remove(val.begin(), val.end(), -63), val.end());
 				record->Values.push_back(val);
-				if ((_columns.get() + i)->Name == sql->OrderBy)
+				if (_columns[i].Name == sql->OrderBy)
 					positionsString.insert(pair<long, string>(read, val));
 				break;
 			}
@@ -229,14 +230,28 @@ int Table::select(Command * sqlCommand)
 		for (std::pair<long, string> element : orderSet)
 			_positions.push_back(element.first);
 	}
+	//_columns.erase(std::remove(_columns.begin(), _columns.end(), "none"), _columns.end());
+	try
+	{
+		auto ds = new DataSet(_records.size(), _columns);
+		ds->SetRecords(_records);
+		showResult(ds);
 
-	auto ds = new DataSet(_records.size(), columnsCount);
-	//_records.Values.erase(std::remove(_records[0]->Values.begin(), record->Values.end(), 8), record->Values.end());
-	ds->SetRecord(_records[0], 0);
-	ds->SetRecord(_records[1], 1);
-	ds->SetRecord(_records[2], 2);
+	}
+	catch (const std::runtime_error& re)
+	{
+		// speciffic handling for runtime_error
+		std::cerr << "Runtime error: " << re.what() << std::endl;
+	}
+	catch (exception ex)
+	{
+		cout << ex.what() << endl;
+	}
+	catch (...)
+	{
+		cout << "test\n";
+	}
 
-	showResult();
 
 	return 0;
 }
@@ -253,7 +268,7 @@ int Table::insert(Command * sqlCommand)
 		for (size_t i = 0; i < sql->Values.size(); i++)
 		{
 
-			switch ((_columns.get() + i)->Type)
+			switch (_columns[i].Type)
 			{
 			case '1':
 			{
@@ -286,10 +301,10 @@ int Table::insert(Command * sqlCommand)
 			case '3':
 			{
 				string val = sql->Values[i];
-				if (val.length() > (_columns.get() + i)->Size)
+				if (val.length() > _columns[i].Size)
 					throw new exception("Not bit");
-				sql->padTo(val, (_columns.get() + i)->Size, 193);
-				BinaryStream::Write((_columns.get() + i)->Size);
+				sql->padTo(val, _columns[i].Size, 193);
+				BinaryStream::Write(_columns[i].Size);
 				BinaryStream::Write(val);
 				break;
 			}
@@ -308,21 +323,31 @@ int Table::insert(Command * sqlCommand)
 	return 0;
 }
 
-void Table::showResult()
+void Table::showResult(DataSet * ds)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, 10);
 	cout << endl;
 
 
-	//����� �������� �����
-	cout << "|" << "#" << "\t" << "|";
-	for (size_t i = 0; i < columnsCount; i++)
+	//
+	cout << "| # |";
+	for (size_t i = 0; i < ds->Columns(); i++)
 	{
-		cout << "\t" << (_columns.get() + i)->Name << "\t" << "|";
+		cout << ds->GetColumnFullName(i) << "|";
 	}
 	cout << endl;
-	for (size_t row = 0; row < _records.size(); row++)
+	for (size_t i = 0; i < ds->Count(); i++)
+	{
+		auto record = ds->GetRecord(i);
+		cout << "|" << i + 1 << " |";
+		for (size_t j = 0; j < ds->Columns(); j++)
+		{
+			cout << "\t" << record.Values[j] << "\t" << "|";
+		}
+		cout << endl;
+	}
+	/*for (size_t row = 0; row < _records.size(); row++)
 	{
 		long pos = row;
 		if (_positions.size() > 0)
@@ -330,7 +355,7 @@ void Table::showResult()
 		cout << "|" << row + 1 << "\t" << "|";
 		for (size_t i = 0; i < columnsCount; i++)
 		{
-			switch ((_columns.get() + i)->Type)
+			switch (_columns[i].Type)
 			{
 			case '1':
 			{
@@ -352,7 +377,7 @@ void Table::showResult()
 			}
 		}
 		cout << endl;
-	}
+	}*/
 	SetConsoleTextAttribute(hConsole, 7);
 }
 //Errors with table has pattern 3xx
