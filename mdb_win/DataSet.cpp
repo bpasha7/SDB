@@ -5,18 +5,18 @@
 Record DataSet::GetRecord(int index)
 {
 	if (index >= _count)
-		throw new exception("GetRecord: Index is bigger then rows number!");
+		throw new Error("GetRecord", "Index is bigger then rows number!", 901);
 	return *(this->_records.get() + index);
 }
 
 bool DataSet::SetRecord(Record record, int index)
 {
 	if (index >= _count)
-		throw new exception("SetRecord: Index is bigger then rows number!");
+		throw Error("SetRecord", "Index is bigger then rows number!", 911);
 	// Remove "none" fields
 	record.Values.erase(remove(record.Values.begin(), record.Values.end(), "none"), record.Values.end());
 	if(record.Values.size() > this->Columns())
-		throw new exception(("SetRecord: " + to_string(index) + " is bigger then rows number!").c_str());
+		throw Error("SetRecord", to_string(index) + " is bigger then rows number!", 912);
 	*(this->_records.get() + index) = record;
 	return true;
 }
@@ -38,14 +38,14 @@ int DataSet::Count()
 string DataSet::GetColumnName(int columnNumber)
 {
 	if (columnNumber >= this->Columns())
-		throw new exception("GetColumnName: Number is bigger then columns number!");
+		throw Error("GetColumnName", to_string(columnNumber) + " is bigger then columns number!", 921);
 	return *(this->_headers.get() + columnNumber);
 }
 
 string DataSet::GetColumnFullName(int columnNumber)
 {
 	if (columnNumber >= this->Columns())
-		throw new exception("GetColumnFullName: Number is bigger then columns number!");
+		throw Error("GetColumnFullName", to_string(columnNumber) + " is bigger then columns number!", 922);
 	auto type = *(this->_types.get() + columnNumber);
 	auto typeName = "";
 	switch (type)

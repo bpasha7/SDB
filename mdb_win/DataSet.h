@@ -6,6 +6,8 @@
 #include <list>
 #include "Record.h"
 #include "Column.h"
+#include "Error.h"
+
 /*Data set*/
 class DataSet
 {

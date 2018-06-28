@@ -1,6 +1,7 @@
 #include "Table.h"
 #include "DataBase.h"
 #include "DataSet.h"
+#include "Error.h"
 #include "BinaryStream.h"
 
 //#include <list>
@@ -238,18 +239,9 @@ int Table::select(Command * sqlCommand)
 		showResult(ds);
 
 	}
-	catch (const std::runtime_error& re)
-	{
-		// speciffic handling for runtime_error
-		std::cerr << "Runtime error: " << re.what() << std::endl;
-	}
-	catch (exception ex)
+	catch (exception& ex)
 	{
 		cout << ex.what() << endl;
-	}
-	catch (...)
-	{
-		cout << "test\n";
 	}
 
 
