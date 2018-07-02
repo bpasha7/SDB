@@ -1,0 +1,26 @@
+#CODE STYLE GUIDE#
+============================================================================================
+#Exceptions#
+/*
+	Error Codes
+1xx -
+2xx -
+3xx -
+xxx -
+9xx - DataSetErrors
+*/
+// Code example
+try
+{
+	throw Error("[ClassOrModule]|[FunctionName]", "[Message]", [ErrorNumber]);
+}
+catch(const exception& ex)
+{
+	// writing to log ERRORS.log
+}
+catch(...)
+{
+	// writing to log FATAL.log
+}
+============================================================================================
+#Logging#

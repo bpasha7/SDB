@@ -94,6 +94,7 @@ int Table::create(Command * sqlCommand)
 	BinaryStream::Close();
 
 	BinaryStream::Create(_dataBaseName, Name, false);
+	BinaryStream::Write(0);
 	BinaryStream::Close();
 
 	return 0;
@@ -256,6 +257,7 @@ int Table::insert(Command * sqlCommand)
 	try
 	{
 		BinaryStream::Open(_dataBaseName, Name, false);
+		
 		BinaryStream::SetPosition(ios_base::end);
 		for (size_t i = 0; i < sql->Values.size(); i++)
 		{
@@ -305,6 +307,12 @@ int Table::insert(Command * sqlCommand)
 				break;
 			}
 		}
+		BinaryStream::SetPosition(0);
+		// Read count of blocks
+		auto count = BinaryStream::ReadInteger();
+		// Increment count of blocks
+		BinaryStream::SetPosition(0);
+		BinaryStream::Write(++count);
 		BinaryStream::Close();
 	}
 	catch (...)

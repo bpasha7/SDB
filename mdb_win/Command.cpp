@@ -76,9 +76,13 @@ Create_Table::~Create_Table()
 
 Select_From::Select_From(Command * command)
 {
+	// Parse table name
 	auto from = find(command->Words.begin(), command->Words.end(), "from") - command->Words.begin();
+	// Getting columns name
+	// All columns if '*'
 	if (command->Words[1] == "*")
 		AllColumns = true;
+	// Parse columns after word 'select'
 	else
 	{
 		ColumnsName.clear();
@@ -86,12 +90,9 @@ Select_From::Select_From(Command * command)
 		{
 			int comma = command->Words[i].find(",");
 			auto name = command->Words[i];
-
 			ColumnsName.push_back(comma != string::npos ? command->Words[i].erase(comma, 1) : command->Words[i]);
 		}
 	}
-	//std::vector<string>::iterator it;
-	//if word from not exist
 	if (from >= command->Words.size()) {
 		//old_name_ not found
 	}

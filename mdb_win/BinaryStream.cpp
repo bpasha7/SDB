@@ -13,19 +13,36 @@ Returns:
 */
 int BinaryStream::Write(int value)
 {
-	_dataBaseStream.write((char *)&value, sizeof(int));
-	return 0;
+	try 
+	{
+		_dataBaseStream.write((char *)&value, sizeof(int));
+		return 1;
+	}
+	catch(...)
+	{
+		return 0;
+	}
 }
 void BinaryStream::Open(string dataBaseName, string tableName, bool head)
 {
+	// Close stream if open
+	if (_dataBaseStream.is_open())
+		_dataBaseStream.close();
+	// Generate file path
 	string ext = head ? ".df" : ".dt";
 	string path = _directory + dataBaseName + "\\" + tableName + ext;
-	_dataBaseStream.open(path, ios::binary | ios::out | ios::in | ios::app);
+	// Open  binary file stream for writing and reading
+	_dataBaseStream.open(path, ios::binary | ios::out | ios::in | ios::ate);
 }
 void BinaryStream::Create(string dataBaseName, string tableName, bool head)
 {
+	// Close stream if open
+	if (_dataBaseStream.is_open())
+		_dataBaseStream.close();
+	// Generate file path
 	string ext = head ? ".df" : ".dt";
 	string path = _directory + dataBaseName + "\\" + tableName + ext;
+	// Open  binary file stream for creating new file
 	_dataBaseStream.open(path, ios::binary | ios::out | ios::in | ios::app);
 }
 void BinaryStream::Close()
